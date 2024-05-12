@@ -17,10 +17,10 @@ function App() {
           Player vs Player
         </button> */}
         {/* <button onClick={() => handleModeChange("ai")}>Player vs AI</button> */}
-
-      {mode === "player" && <TicTacToeCanvas />}
+        <TicTacToe/>
+      {/* {mode === "player" && <TicTacToeCanvas />}
       {mode === "ai" && <TicTacToe />}
-      {mode === null && <p>Please select a mode above to start playing!</p>}
+      {mode === null && <p>Please select a mode above to start playing!</p>} */}
       
       </div>
   );
