@@ -1,13 +1,13 @@
-import { useState } from "react";
+// import { useState } from "react";
 // import "./App.css";
 import TicTacToe from "./components/TicTacToe";
-import TicTacToeCanvas from "./components/TicTacToeCanvas";
+// import TicTacToeCanvas from "./components/TicTacToeCanvas";
 function App() {
-  const [mode, setMode] = useState(null);
+  // const [mode, setMode] = useState(null);
 
-  const handleModeChange = (newMode) => {
-    setMode(newMode);
-  };
+  // const handleModeChange = (newMode) => {
+  //   setMode(newMode);
+  // };
 
   return (
       <div className="App">
