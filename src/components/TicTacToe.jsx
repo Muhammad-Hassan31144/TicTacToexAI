@@ -249,13 +249,14 @@ const TicTacToe = () => {
             handleCellClick(y, x);
           }
         }}
+        className="canvas"
       />
-      <div>
+      <div className="game-info">
         <p>Current Player: {currentPlayer}</p>
         {winner && <p>{winner === 'Draw' ? "It's a Draw!" : `Player ${winner} Wins!`}</p>}
         {gameOver && <button onClick={resetGame}>Play Again</button>}
       </div>
-      <div>
+      <div className="ai-mode">
         <label>Select AI Mode:</label>
         <select value={aiMode} onChange={(e) => handleModeChange(e.target.value)}>
           <option value="easy">Easy</option>
