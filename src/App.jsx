@@ -1,5 +1,6 @@
 // import { useState } from "react";
 // import "./App.css";
+import "./index.css"
 import TicTacToe from "./components/TicTacToe";
 // import TicTacToeCanvas from "./components/TicTacToeCanvas";
 function App() {
