@@ -102,7 +102,6 @@ const TicTacToe = () => {
   
   const getBlockingMove = (currentBoard, player) => {
     const opponent = player === O ? X : O;
-  
     // Check for winning moves or blocking moves
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
@@ -111,7 +110,7 @@ const TicTacToe = () => {
           currentBoard[row][col] = player;
           const winner = checkWinner(currentBoard, player);
           currentBoard[row][col] = EMPTY; // Undo move
-  
+
           // If placing the token here results in a win, return this move
           if (winner === player) {
             return { row, col };
@@ -121,7 +120,7 @@ const TicTacToe = () => {
           currentBoard[row][col] = opponent;
           const opponentWinner = checkWinner(currentBoard, opponent);
           currentBoard[row][col] = EMPTY; // Undo move
-  
+
           // If placing the token here blocks opponent's win, return this move
           if (opponentWinner === opponent) {
             return { row, col };
@@ -129,12 +128,77 @@ const TicTacToe = () => {
         }
       }
     }
-  
-    // If no winning or blocking moves, return null
-    return null;
+
+    // If no winning or blocking moves, return a random move
+    return getRandomMove(currentBoard);
   };
   
+  const getBestMoveMinimax = async (currentBoard, player, opponent) => {
+    const emptyCells = [];
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        if (currentBoard[row][col] === EMPTY) {
+          emptyCells.push({ row, col });
+        }
+      }
+    }
 
+    let bestMove = { row: -1, col: -1 };
+    let bestScore = -Infinity;
+
+    for (let i = 0; i < emptyCells.length; i++) {
+      const { row, col } = emptyCells[i];
+      currentBoard[row][col] = player;
+      const score = await minimax(currentBoard, opponent, player, false);
+      currentBoard[row][col] = EMPTY;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestMove = { row, col };
+      }
+    }
+
+    return bestMove;
+  };
+
+  const minimax = async (currentBoard, player, opponent, isMaximizing) => {
+    const winner = checkWinner(currentBoard, player);
+    if (winner === player) {
+      return 1;
+    } else if (winner === opponent) {
+      return -1;
+    } else if (isBoardFull(currentBoard)) {
+      return 0;
+    }
+
+    if (isMaximizing) {
+      let bestScore = -Infinity;
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          if (currentBoard[row][col] === EMPTY) {
+            currentBoard[row][col] = player;
+            const score = await minimax(currentBoard, opponent, player, false);
+            currentBoard[row][col] = EMPTY;
+            bestScore = Math.max(score, bestScore);
+          }
+        }
+      }
+      return bestScore;
+    } else {
+      let bestScore = Infinity;
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          if (currentBoard[row][col] === EMPTY) {
+            currentBoard[row][col] = opponent;
+            const score = await minimax(currentBoard, opponent, player, true);
+            currentBoard[row][col] = EMPTY;
+            bestScore = Math.min(score, bestScore);
+          }
+        }
+      }
+      return bestScore;
+    }
+  };
   const makeAIMove = async (aiMode) => {
     let aiMove = { row: -1, col: -1 };
   
@@ -154,7 +218,7 @@ const TicTacToe = () => {
         }
         break;
       default:
-        aiMove = getRandomMove(board); // Default to easy mode
+        aiMove = await getBestMoveMinimax(board, O, X);
         break;
     }
   
@@ -165,7 +229,7 @@ const TicTacToe = () => {
           aiMove = getRandomMove(board);
           break;
         case 'medium':
-          aiMove = getBlockingMove(board, O) || getRandomMove(board);
+          aiMove = getBlockingMove(board, O);
           break;
         case 'hard':
           try {
