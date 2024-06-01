@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import 'tailwindcss/tailwind.css';
 
 const X = "X";
 const O = "O";
@@ -11,6 +12,9 @@ const TicTacToe = () => {
   const [winner, setWinner] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [aiMode, setAiMode] = useState('medium');
+  const [winCount, setWinCount] = useState(0);
+  const [lossCount, setLossCount] = useState(0);
+  const [drawCount, setDrawCount] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -75,9 +79,15 @@ const TicTacToe = () => {
       if (gameWinner) {
         setWinner(gameWinner);
         setGameOver(true);
+        if (gameWinner === O) {
+          setWinCount(winCount + 1);
+        } else if (gameWinner === X) {
+          setLossCount(lossCount + 1);
+        }
       } else if (isBoardFull(updatedBoard)) {
         setWinner('Draw');
         setGameOver(true);
+        setDrawCount(drawCount + 1);
       } else {
         const nextPlayer = currentPlayer === X ? O : X;
         setCurrentPlayer(nextPlayer);
@@ -224,9 +234,15 @@ const TicTacToe = () => {
       if (gameWinner) {
         setWinner(gameWinner);
         setGameOver(true);
+        if (gameWinner === O) {
+          setWinCount(winCount + 1);
+        } else if (gameWinner === X) {
+          setLossCount(lossCount + 1);
+        }
       } else if (isBoardFull(currentBoard)) {
         setWinner('Draw');
         setGameOver(true);
+        setDrawCount(drawCount + 1);
       } else {
         setCurrentPlayer(X);
       }
@@ -270,7 +286,8 @@ const TicTacToe = () => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="text-2xl font-bold mb-4">Tic Tac Toe</div>
       <canvas
         ref={canvasRef}
         width={300}
@@ -284,16 +301,33 @@ const TicTacToe = () => {
             handleCellClick(y, x);
           }
         }}
-        className="canvas"
+        className="border-4 border-black mb-4"
       />
-      <div className="game-info">
-        <p>Current Player: {currentPlayer}</p>
-        {winner && <p>{winner === 'Draw' ? "It's a Draw!" : `Player ${winner} Wins!`}</p>}
-        {gameOver && <button onClick={resetGame}>Play Again</button>}
+      <div className="game-info text-lg font-semibold mb-4">
+        <p className={`text-${currentPlayer === X ? 'blue' : 'red'}-500`}>Current Player: {currentPlayer}</p>
+        <div>
+          <p>Wins: {winCount}</p>
+          <p>Losses: {lossCount}</p>
+          <p>Draws: {drawCount}</p>
+        </div>
+        {winner && (
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+            <div className="bg-white p-6 rounded-lg text-center">
+              <p className="text-xl font-bold">
+                {winner === 'Draw' ? "It's a Draw!" : `Player ${winner} Wins!`}
+              </p>
+              <button onClick={resetGame} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Play Again</button>
+            </div>
+          </div>
+        )}
       </div>
-      <div className="ai-mode">
-        <label>Select AI Mode:</label>
-        <select value={aiMode} onChange={(e) => handleModeChange(e.target.value)}>
+      <div className="ai-mode mb-4">
+        <label className="block text-lg font-semibold mb-2">Select AI Mode:</label>
+        <select
+          value={aiMode}
+          onChange={(e) => handleModeChange(e.target.value)}
+          className="px-4 py-2 border rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
           <option value="easy">Easy</option>
           <option value="medium">Medium</option>
           <option value="hard">Hard</option>
