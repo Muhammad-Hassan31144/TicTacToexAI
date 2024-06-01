@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 
 const X = "X";
@@ -12,6 +11,7 @@ const TicTacToe = () => {
   const [winner, setWinner] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [aiMode, setAiMode] = useState('medium');
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -43,7 +43,6 @@ const TicTacToe = () => {
         }
       });
     });
-
   };
 
   const drawX = (ctx, row, col, size) => {
@@ -67,8 +66,9 @@ const TicTacToe = () => {
 
   const handleCellClick = (row, col) => {
     if (!gameOver && board[row][col] === EMPTY) {
-      const updatedBoard = [...board];
-      updatedBoard[row][col] = currentPlayer;
+      const updatedBoard = board.map((r, rowIndex) =>
+        r.map((cell, colIndex) => (rowIndex === row && colIndex === col ? currentPlayer : cell))
+      );
       setBoard(updatedBoard);
 
       const gameWinner = checkWinner(updatedBoard, currentPlayer);
@@ -79,9 +79,10 @@ const TicTacToe = () => {
         setWinner('Draw');
         setGameOver(true);
       } else {
-        setCurrentPlayer(currentPlayer === X ? O : X);
-        if (currentPlayer === X) {
-          setTimeout(() => makeAIMove(updatedBoard), 500); 
+        const nextPlayer = currentPlayer === X ? O : X;
+        setCurrentPlayer(nextPlayer);
+        if (nextPlayer === O) {
+          setTimeout(() => makeAIMove(aiMode, updatedBoard), 500);
         }
       }
     }
@@ -96,44 +97,36 @@ const TicTacToe = () => {
         }
       }
     }
-    // Choose a random empty cell
     return emptyCells[Math.floor(Math.random() * emptyCells.length)];
   };
-  
+
   const getBlockingMove = (currentBoard, player) => {
     const opponent = player === O ? X : O;
-    // Check for winning moves or blocking moves
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
         if (currentBoard[row][col] === EMPTY) {
-          // Simulate placing player's token and check for a win
           currentBoard[row][col] = player;
           const winner = checkWinner(currentBoard, player);
-          currentBoard[row][col] = EMPTY; // Undo move
+          currentBoard[row][col] = EMPTY;
 
-          // If placing the token here results in a win, return this move
           if (winner === player) {
             return { row, col };
           }
-          
-          // Simulate placing opponent's token and check for a win
+
           currentBoard[row][col] = opponent;
           const opponentWinner = checkWinner(currentBoard, opponent);
-          currentBoard[row][col] = EMPTY; // Undo move
+          currentBoard[row][col] = EMPTY;
 
-          // If placing the token here blocks opponent's win, return this move
           if (opponentWinner === opponent) {
             return { row, col };
           }
         }
       }
     }
-
-    // If no winning or blocking moves, return a random move
     return getRandomMove(currentBoard);
   };
-  
-  const getBestMoveMinimax = async (currentBoard, player, opponent) => {
+
+  const getBestMoveMinimax = (currentBoard, player, opponent) => {
     const emptyCells = [];
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
@@ -149,7 +142,7 @@ const TicTacToe = () => {
     for (let i = 0; i < emptyCells.length; i++) {
       const { row, col } = emptyCells[i];
       currentBoard[row][col] = player;
-      const score = await minimax(currentBoard, opponent, player, false);
+      const score = minimax(currentBoard, opponent, player, false);
       currentBoard[row][col] = EMPTY;
 
       if (score > bestScore) {
@@ -161,7 +154,7 @@ const TicTacToe = () => {
     return bestMove;
   };
 
-  const minimax = async (currentBoard, player, opponent, isMaximizing) => {
+  const minimax = (currentBoard, player, opponent, isMaximizing) => {
     const winner = checkWinner(currentBoard, player);
     if (winner === player) {
       return 1;
@@ -177,7 +170,7 @@ const TicTacToe = () => {
         for (let col = 0; col < 3; col++) {
           if (currentBoard[row][col] === EMPTY) {
             currentBoard[row][col] = player;
-            const score = await minimax(currentBoard, opponent, player, false);
+            const score = minimax(currentBoard, opponent, player, false);
             currentBoard[row][col] = EMPTY;
             bestScore = Math.max(score, bestScore);
           }
@@ -190,7 +183,7 @@ const TicTacToe = () => {
         for (let col = 0; col < 3; col++) {
           if (currentBoard[row][col] === EMPTY) {
             currentBoard[row][col] = opponent;
-            const score = await minimax(currentBoard, opponent, player, true);
+            const score = minimax(currentBoard, opponent, player, true);
             currentBoard[row][col] = EMPTY;
             bestScore = Math.min(score, bestScore);
           }
@@ -199,76 +192,54 @@ const TicTacToe = () => {
       return bestScore;
     }
   };
-  const makeAIMove = async (aiMode) => {
+
+  const makeAIMove = (aiMode, currentBoard) => {
     let aiMove = { row: -1, col: -1 };
-  
+
     switch (aiMode) {
       case 'easy':
-        aiMove = getRandomMove(board);
+        aiMove = getRandomMove(currentBoard);
         break;
       case 'medium':
-        aiMove = getBlockingMove(board, O) || getRandomMove(board);
+        aiMove = getBlockingMove(currentBoard, O);
         break;
       case 'hard':
         try {
-          aiMove = await getBestMoveMinimax(board, O, X);
+          aiMove = getBestMoveMinimax(currentBoard, O, X);
         } catch (error) {
           console.error('Error in minimax calculation:', error);
-          aiMove = getRandomMove(board); // Fallback to random move
+          aiMove = getRandomMove(currentBoard);
         }
         break;
       default:
-        aiMove = await getBestMoveMinimax(board, O, X);
+        aiMove = getRandomMove(currentBoard);
         break;
     }
-  
-    // Retry until a valid move is found
-    while (aiMove.row === -1 || aiMove.col === -1 || board[aiMove.row][aiMove.col] !== EMPTY) {
-      switch (aiMode) {
-        case 'easy':
-          aiMove = getRandomMove(board);
-          break;
-        case 'medium':
-          aiMove = getBlockingMove(board, O);
-          break;
-        case 'hard':
-          try {
-            aiMove = await getBestMoveMinimax(board, O, X);
-          } catch (error) {
-            console.error('Error in minimax calculation (retry):', error);
-            aiMove = getRandomMove(board); // Fallback to random move
-          }
-          break;
-        default:
-          aiMove = getRandomMove(board); // Default to easy mode
-          break;
+
+    if (aiMove.row !== -1 && aiMove.col !== -1) {
+      currentBoard[aiMove.row][aiMove.col] = O;
+      setBoard([...currentBoard]);
+
+      const gameWinner = checkWinner(currentBoard, O);
+      if (gameWinner) {
+        setWinner(gameWinner);
+        setGameOver(true);
+      } else if (isBoardFull(currentBoard)) {
+        setWinner('Draw');
+        setGameOver(true);
+      } else {
+        setCurrentPlayer(X);
       }
     }
-  
-    const updatedBoard = [...board];
-    updatedBoard[aiMove.row][aiMove.col] = O;
-    setBoard(updatedBoard);
-  
-    const gameWinner = checkWinner(updatedBoard, O);
-    if (gameWinner) {
-      setWinner(gameWinner);
-      setGameOver(true);
-    } else if (isBoardFull(updatedBoard)) {
-      setWinner('Draw');
-      setGameOver(true);
-    } else {
-      setCurrentPlayer(X);
-    }
   };
-  
 
   const handleModeChange = (mode) => {
     setAiMode(mode);
     if (!gameOver && currentPlayer === O) {
-      makeAIMove();
+      makeAIMove(mode, board);
     }
   };
-  
+
   const checkWinner = (currentBoard, player) => {
     for (let i = 0; i < 3; i++) {
       if (currentBoard[i][0] === player && currentBoard[i][1] === player && currentBoard[i][2] === player) {
@@ -284,7 +255,7 @@ const TicTacToe = () => {
     if (currentBoard[0][2] === player && currentBoard[1][1] === player && currentBoard[2][0] === player) {
       return player;
     }
-    return null; 
+    return null;
   };
 
   const isBoardFull = (currentBoard) => {
