@@ -136,118 +136,211 @@ const TicTacToe = ({setMode}) => {
     return getRandomMove(currentBoard);
   };
 
-  const getBestMoveMinimax = (currentBoard, player, opponent) => {
-    const emptyCells = [];
+  // const getBestMoveMinimax = (currentBoard, player, opponent) => {
+  //   const emptyCells = [];
+  //   for (let row = 0; row < 3; row++) {
+  //     for (let col = 0; col < 3; col++) {
+  //       if (currentBoard[row][col] === EMPTY) {
+  //         emptyCells.push({ row, col });
+  //       }
+  //     }
+  //   }
+
+  //   let bestMove = { row: -1, col: -1 };
+  //   let bestScore = -Infinity;
+
+  //   for (let i = 0; i < emptyCells.length; i++) {
+  //     const { row, col } = emptyCells[i];
+  //     currentBoard[row][col] = player;
+  //     const score = minimax(currentBoard, opponent, player, false);
+  //     currentBoard[row][col] = EMPTY;
+
+  //     if (score > bestScore) {
+  //       bestScore = score;
+  //       bestMove = { row, col };
+  //     }
+  //   }
+
+  //   return bestMove;
+  // };
+
+  // const minimax = (currentBoard, player, opponent, isMaximizing) => {
+  //   const winner = checkWinner(currentBoard, player);
+  //   if (winner === player) {
+  //     return 1;
+  //   } else if (winner === opponent) {
+  //     return -1;
+  //   } else if (isBoardFull(currentBoard)) {
+  //     return 0;
+  //   }
+
+  //   if (isMaximizing) {
+  //     let bestScore = -Infinity;
+  //     for (let row = 0; row < 3; row++) {
+  //       for (let col = 0; col < 3; col++) {
+  //         if (currentBoard[row][col] === EMPTY) {
+  //           currentBoard[row][col] = player;
+  //           const score = minimax(currentBoard, opponent, player, false);
+  //           currentBoard[row][col] = EMPTY;
+  //           bestScore = Math.max(score, bestScore);
+  //         }
+  //       }
+  //     }
+  //     return bestScore;
+  //   } else {
+  //     let bestScore = Infinity;
+  //     for (let row = 0; row < 3; row++) {
+  //       for (let col = 0; col < 3; col++) {
+  //         if (currentBoard[row][col] === EMPTY) {
+  //           currentBoard[row][col] = opponent;
+  //           const score = minimax(currentBoard, opponent, player, true);
+  //           currentBoard[row][col] = EMPTY;
+  //           bestScore = Math.min(score, bestScore);
+  //         }
+  //       }
+  //     }
+  //     return bestScore;
+  //   }
+  // };
+
+  // const makeAIMove = (aiMode, currentBoard) => {
+  //   let aiMove = { row: -1, col: -1 };
+
+  //   switch (aiMode) {
+  //     case 'easy':
+  //       aiMove = getRandomMove(currentBoard);
+  //       break;
+  //     case 'medium':
+  //       aiMove = getBlockingMove(currentBoard, O);
+  //       break;
+  //     case 'hard':
+  //       try {
+  //         aiMove = getBestMoveMinimax(currentBoard, O, X);
+  //       } catch (error) {
+  //         console.error('Error in minimax calculation:', error);
+  //         aiMove = getRandomMove(currentBoard);
+  //       }
+  //       break;
+  //     default:
+  //       aiMove = getRandomMove(currentBoard);
+  //       break;
+  //   }
+
+  //   if (aiMove.row !== -1 && aiMove.col !== -1) {
+  //     currentBoard[aiMove.row][aiMove.col] = O;
+  //     setBoard([...currentBoard]);
+
+  //     const gameWinner = checkWinner(currentBoard, O);
+  //     if (gameWinner) {
+  //       setWinner(gameWinner);
+  //       setGameOver(true);
+  //       if (gameWinner === O) {
+  //         setWinCount(winCount + 1);
+  //       } else if (gameWinner === X) {
+  //         setLossCount(lossCount + 1);
+  //       }
+  //     } else if (isBoardFull(currentBoard)) {
+  //       setWinner('Draw');
+  //       setGameOver(true);
+  //       setDrawCount(drawCount + 1);
+  //     } else {
+  //       setCurrentPlayer(X);
+  //     }
+  //   }
+  // };
+
+// Minimax Algorithm Functions
+
+const minimax = (board, depth, isMaximizing) => {
+  const winner = checkWinner(board, O) || checkWinner(board, X);
+  if (winner === O) return 10 - depth;
+  if (winner === X) return depth - 10;
+  if (isBoardFull(board)) return 0;
+
+  if (isMaximizing) {
+    let bestScore = -Infinity;
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
-        if (currentBoard[row][col] === EMPTY) {
-          emptyCells.push({ row, col });
+        if (board[row][col] === EMPTY) {
+          board[row][col] = O;
+          let score = minimax(board, depth + 1, false);
+          board[row][col] = EMPTY;
+          bestScore = Math.max(score, bestScore);
         }
       }
     }
-
-    let bestMove = { row: -1, col: -1 };
-    let bestScore = -Infinity;
-
-    for (let i = 0; i < emptyCells.length; i++) {
-      const { row, col } = emptyCells[i];
-      currentBoard[row][col] = player;
-      const score = minimax(currentBoard, opponent, player, false);
-      currentBoard[row][col] = EMPTY;
-
-      if (score > bestScore) {
-        bestScore = score;
-        bestMove = { row, col };
+    return bestScore;
+  } else {
+    let bestScore = Infinity;
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        if (board[row][col] === EMPTY) {
+          board[row][col] = X;
+          let score = minimax(board, depth + 1, true);
+          board[row][col] = EMPTY;
+          bestScore = Math.min(score, bestScore);
+        }
       }
     }
+    return bestScore;
+  }
+};
 
-    return bestMove;
-  };
+const getBestMove = (board) => {
+  let bestScore = -Infinity;
+  let move = { row: -1, col: -1 };
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      if (board[row][col] === EMPTY) {
+        board[row][col] = O;
+        let score = minimax(board, 0, false);
+        board[row][col] = EMPTY;
+        if (score > bestScore) {
+          bestScore = score;
+          move = { row, col };
+        }
+      }
+    }
+  }
+  return move;
+};
 
-  const minimax = (currentBoard, player, opponent, isMaximizing) => {
-    const winner = checkWinner(currentBoard, player);
-    if (winner === player) {
-      return 1;
-    } else if (winner === opponent) {
-      return -1;
+// Updated makeAIMove function
+
+const makeAIMove = (aiMode, currentBoard) => {
+  let aiMove = { row: -1, col: -1 };
+
+  switch (aiMode) {
+    case 'easy':
+      aiMove = getRandomMove(currentBoard);
+      break;
+    case 'medium':
+      aiMove = getBlockingMove(currentBoard, O);
+      break;
+    case 'hard':
+      aiMove = getBestMove(currentBoard);
+      break;
+    default:
+      aiMove = getRandomMove(currentBoard);
+      break;
+  }
+
+  if (aiMove.row !== -1 && aiMove.col !== -1) {
+    currentBoard[aiMove.row][aiMove.col] = O;
+    setBoard([...currentBoard]);
+
+    const gameWinner = checkWinner(currentBoard, O);
+    if (gameWinner) {
+      setWinner(gameWinner);
+      setGameOver(true);
     } else if (isBoardFull(currentBoard)) {
-      return 0;
-    }
-
-    if (isMaximizing) {
-      let bestScore = -Infinity;
-      for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 3; col++) {
-          if (currentBoard[row][col] === EMPTY) {
-            currentBoard[row][col] = player;
-            const score = minimax(currentBoard, opponent, player, false);
-            currentBoard[row][col] = EMPTY;
-            bestScore = Math.max(score, bestScore);
-          }
-        }
-      }
-      return bestScore;
+      setWinner('Draw');
+      setGameOver(true);
     } else {
-      let bestScore = Infinity;
-      for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 3; col++) {
-          if (currentBoard[row][col] === EMPTY) {
-            currentBoard[row][col] = opponent;
-            const score = minimax(currentBoard, opponent, player, true);
-            currentBoard[row][col] = EMPTY;
-            bestScore = Math.min(score, bestScore);
-          }
-        }
-      }
-      return bestScore;
+      setCurrentPlayer(X);
     }
-  };
-
-  const makeAIMove = (aiMode, currentBoard) => {
-    let aiMove = { row: -1, col: -1 };
-
-    switch (aiMode) {
-      case 'easy':
-        aiMove = getRandomMove(currentBoard);
-        break;
-      case 'medium':
-        aiMove = getBlockingMove(currentBoard, O);
-        break;
-      case 'hard':
-        try {
-          aiMove = getBestMoveMinimax(currentBoard, O, X);
-        } catch (error) {
-          console.error('Error in minimax calculation:', error);
-          aiMove = getRandomMove(currentBoard);
-        }
-        break;
-      default:
-        aiMove = getRandomMove(currentBoard);
-        break;
-    }
-
-    if (aiMove.row !== -1 && aiMove.col !== -1) {
-      currentBoard[aiMove.row][aiMove.col] = O;
-      setBoard([...currentBoard]);
-
-      const gameWinner = checkWinner(currentBoard, O);
-      if (gameWinner) {
-        setWinner(gameWinner);
-        setGameOver(true);
-        if (gameWinner === O) {
-          setWinCount(winCount + 1);
-        } else if (gameWinner === X) {
-          setLossCount(lossCount + 1);
-        }
-      } else if (isBoardFull(currentBoard)) {
-        setWinner('Draw');
-        setGameOver(true);
-        setDrawCount(drawCount + 1);
-      } else {
-        setCurrentPlayer(X);
-      }
-    }
-  };
+  }
+};
 
   const handleModeChange = (mode) => {
     setAiMode(mode);
