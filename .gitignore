@@ -11,7 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-src/components/TicTacToeCanvas.jsx
+
 src/components/TTT.jsx
 # Editor directories and files
 .vscode/*

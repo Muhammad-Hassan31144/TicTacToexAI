@@ -5,7 +5,7 @@ const X = "X";
 const O = "O";
 const EMPTY = null;
 
-const TicTacToe = () => {
+const TicTacToe = ({setMode}) => {
   const canvasRef = useRef(null);
   const [board, setBoard] = useState(() => Array(3).fill().map(() => Array(3).fill(EMPTY)));
   const [currentPlayer, setCurrentPlayer] = useState(X);
@@ -333,6 +333,14 @@ const TicTacToe = () => {
           <option value="hard">Hard</option>
         </select>
       </div>
+      <div className="flex justify-center mt-4">
+      <button
+        onClick={() => setMode(null)}
+        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
+      >
+        Quit
+      </button>
+    </div>
     </div>
   );
 };
