@@ -1,72 +1,168 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.App{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #669bcf;
-  width: 100%;
-}
-.canvas {
-  border: 2px solid #000;
+
+/* Custom animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.game-info {
-  margin-top: 20px;
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-.ai-mode {
-  margin-top: 20px;
+@keyframes slide-up {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-.ai-mode label {
-  font-weight: bold;
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6);
+  }
 }
 
-/* 
-.game-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 50px;
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(2px);
+  }
 }
 
-.game-status {
-  font-size: 24px;
-  margin-bottom: 20px;
+/* Custom utility classes */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }
 
-.board {
-  display: grid;
-  grid-template-columns: repeat(3, 100px);
-  grid-gap: 5px;
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.tile {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100px;
-  height: 100px;
-  background-color: #ddd;
-  font-size: 36px;
-  cursor: pointer;
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
 }
 
-.play-again-btn {
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 18px;
-  border: none;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: #fff;
-  cursor: pointer;
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
 }
 
-.play-again-btn:hover {
-  background-color: #0056b3;
-} */
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Improved mobile touch targets */
+@media (max-width: 768px) {
+  canvas {
+    width: 90vw !important;
+    height: 90vw !important;
+    max-width: 350px !important;
+    max-height: 350px !important;
+    touch-action: manipulation;
+  }
+  
+  button {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+}
+
+/* Smooth transitions for all elements */
+* {
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Custom scrollbar for dark mode */
+.dark::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+select:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Backdrop blur support fallback */
+@supports not (backdrop-filter: blur(10px)) {
+  .backdrop-blur-sm {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .dark .backdrop-blur-sm {
+    background-color: rgba(17, 24, 39, 0.8);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .bg-gradient-to-br {
+    background: var(--tw-gradient-stops);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .fixed {
+    position: static !important;
+  }
+  
+  button {
+    border: 1px solid #000 !important;
+  }
+}
