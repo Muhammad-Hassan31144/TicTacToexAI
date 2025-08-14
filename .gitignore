@@ -22,4 +22,5 @@ src/components/TTT.jsx
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+*.sw.?
+.claude
